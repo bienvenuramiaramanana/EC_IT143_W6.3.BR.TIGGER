@@ -1,0 +1,50 @@
+# EC_IT143_W6.3.BR.TIGGER
+
+
+ --Q3  Find the top 5 amounts between the "credit_card_transaction_flow" table and the "Repayment" table
+
+	SELECT TOP 5 *
+	FROM  ( 
+
+	     SELECT [Transaction Amount] AS Amount
+
+         FROM [Sympsons].[dbo].[credit_card_transaction_flow]
+	   
+
+		  UNION ALL
+
+		  SELECT [Amount]
+		  FROM [Sympsons].[dbo].[Repayment]
+
+       )  AS Cordinate
+		  ORDER BY Amount DESC
+
+		-- Step 4 - Create an after-update trigger
+
+		CREATE TRIGGER  trg_top5
+ON dbo.credit_card_transaction_flow
+AFTER INSERT, UPDATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Delete existing records in the auditing table
+    DELETE FROM dbo.[Customer Acqusition];
+
+    -- Insert top 5 amounts from credit_card_transaction_flow table
+    INSERT INTO dbo.[Customer Acqusition] (City, Age)
+    SELECT TOP 5 'credit_card_transaction_flow' AS c_beloha, [Transaction Amount] AS TransactionAmount
+    FROM inserted
+    ORDER BY [Transaction Amount] DESC;
+
+    -- Insert top 5 amounts from Repayment table
+    INSERT INTO dbo.[Customer Acqusition] (Company, Customer)
+    SELECT TOP 5 'Repayment' AS R_beloha, Amount AS TransactionAmount
+    FROM dbo.Repayment
+    ORDER BY Amount DESC;
+END;
+
+
+SELECT * FROM trg_top5 ;
+
+DROP TRIGGER  trg_top5
